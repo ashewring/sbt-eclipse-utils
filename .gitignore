@@ -1,0 +1,15 @@
+syntax: glob
+
+lib_managed
+project/boot
+src_managed
+target
+classes
+.idea/workspace.xml
+.idea/ant.xml
+.DS_Store
+*~
+
+/sbt-tycho.iml
+/project/project.iml
+.idea
