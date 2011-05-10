@@ -1,4 +1,3 @@
-import java.io.File
 import sbt._
 
 class SbtEclipseUtilsPlugin(info: ProjectInfo) extends PluginProject(info) {

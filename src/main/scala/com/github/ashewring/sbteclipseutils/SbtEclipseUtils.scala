@@ -34,42 +34,42 @@ trait SbtEclipseUtils {
 
 			// create .project
 			val dotProjectXml =
-	<projectDescription>
-		<name>{name}</name>
-		<comment></comment>
-		<buildSpec>
-			<buildCommand>
-				<name>org.eclipse.jdt.core.javabuilder</name>
-				<arguments>
-				</arguments>
-			</buildCommand>
-			<buildCommand>
-				<name>org.eclipse.pde.ManifestBuilder</name>
-				<arguments>
-				</arguments>
-			</buildCommand>
-			<buildCommand>
-				<name>org.eclipse.pde.SchemaBuilder</name>
-				<arguments>
-				</arguments>
-			</buildCommand>
-		</buildSpec>
-		<natures>
-			<nature>org.eclipse.jdt.core.javanature</nature>
-			<nature>org.eclipse.pde.PluginNature</nature>
-		</natures>
-	</projectDescription>
+<projectDescription>
+	<name>{name}</name>
+	<comment></comment>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.pde.ManifestBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.pde.SchemaBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.pde.PluginNature</nature>
+	</natures>
+</projectDescription>
 
 			writeXml(new File(projectDir, ".project"), dotProjectXml)
-			
+
 			// create .classpath
 			val dotClasspathXml =
-	<classpath>
-		<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
-		<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-		<classpathentry kind="src" path="src"/>
-		<classpathentry kind="output" path="bin"/>
-	</classpath>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
 
 			writeXml(new File(projectDir, ".classpath"), dotClasspathXml )
 			

@@ -10,6 +10,6 @@ classes
 .DS_Store
 *~
 
-/sbt-tycho.iml
+/sbt-eclipse-utils.iml
 /project/project.iml
 .idea
