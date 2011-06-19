@@ -127,7 +127,16 @@ trait SbtEclipseUtils {
 		val digraph = new ListBuffer[(String, String)]()
 		manifests.foreach(m => addEdges(digraph, m))
 
+		val stringBuilder = new StringBuilder
+		stringBuilder.append("digraph graphname {")
+		digraph.foreach(edge => {
+			stringBuilder.append(edge._1)
+			stringBuilder.append(" -> ")
+			stringBuilder.append(edge._2)
+		})
+		stringBuilder.append("}")
 
+		println(stringBuilder.toString)
 
 		/*
 		digraph graphname {
