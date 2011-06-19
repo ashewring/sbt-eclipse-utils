@@ -6,7 +6,9 @@ package com.github.ashewring.sbteclipseutils
 
 import sbt._
 import scala.xml._
-import java.io.File
+import java.util.jar.Manifest
+import collection.mutable.ListBuffer
+import java.io.{FileInputStream, File}
 
 trait SbtEclipseUtils {
 	this: ParentProject =>
@@ -121,6 +123,43 @@ trait SbtEclipseUtils {
 			.filter(_.exists)
 
 		println("manifests: " + manifests)
+
+		val digraph = new ListBuffer[(String, String)]()
+		manifests.foreach(m => addEdges(digraph, m))
+
+
+
+		/*
+		digraph graphname {
+     a -> b -> c;
+     b -> d;
+ 		}
+ 		*/
+	}
+
+	private def addEdges(digraph: ListBuffer[(String, String)], manifestFile: File) = {
+		val manifest = new Manifest(new FileInputStream(manifestFile))
+		val mainAttributes = manifest.getMainAttributes()
+		val symbolicName = mainAttributes.getValue("Bundle-SymbolicName")
+
+		// record fragment bundle dependencies
+		val fragmentHostValue = mainAttributes.getValue("Fragment-Host")
+		if (fragmentHostValue != null) {
+			digraph.append( (symbolicName, fragmentHostValue) )
+		}
+
+		// record "Require-Bundle" dependencies
+		val requireBundleValue = mainAttributes.getValue("Require-Bundle")
+		if (requireBundleValue != null) {
+			val bundleDescriptors = requireBundleValue.split(",")
+			bundleDescriptors.foreach(bundleDescriptor => {
+				// remove additional metadata, e.g., ';bundle-version="1.2.15"'
+				val namePart = bundleDescriptor.trim().split(";")
+				val bundleName = namePart(0)
+				// TODO filter to only care about certain bundles
+				digraph.append( (symbolicName, bundleName) )
+			})
+		}
 	}
 	
 	private def writeLines(file: File, lines: List[String]) {
