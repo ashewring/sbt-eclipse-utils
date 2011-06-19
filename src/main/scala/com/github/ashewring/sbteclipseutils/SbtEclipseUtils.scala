@@ -128,11 +128,12 @@ trait SbtEclipseUtils {
 		manifests.foreach(m => addEdges(digraph, m))
 
 		val stringBuilder = new StringBuilder
-		stringBuilder.append("digraph graphname {")
+		stringBuilder.append("digraph graphname {\n")
 		digraph.foreach(edge => {
 			stringBuilder.append(edge._1)
 			stringBuilder.append(" -> ")
 			stringBuilder.append(edge._2)
+			stringBuilder.append("\n")
 		})
 		stringBuilder.append("}")
 
