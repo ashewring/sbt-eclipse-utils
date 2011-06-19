@@ -98,13 +98,29 @@ trait SbtEclipseUtils {
 			val bundleSymbolicName = "Bundle-SymbolicName: " + name + "; singleton:=true"
 			val bundleVersion = "Bundle-Version: 0.0.0"
 			val bundleRequiredExecEnv = "Bundle-RequiredExecutionEnvironment: J2SE-1.5"
-			val manifestContents = List(manifestVersion, bundleManifestVersion, bundleName, bundleSymbolicName, bundleVersion, bundleRequiredExecEnv)
+			val manifestContents = List(manifestVersion, bundleManifestVersion, bundleName, bundleSymbolicName, bundleVersion, bundleRequiredExecEnv, "\n")
 			
 			writeLines(new File(metaInfDir, "MANIFEST.MF"), manifestContents)
-			
+
 			// TODO create a test project given a "normal" project
 			None
 		}
+	}
+
+	/* Generate DOT graph from manifest entries */
+	lazy val pdeDependencies = task {
+		showDependencies()
+		None
+	}
+
+	private def showDependencies() = {
+		val directory = new File(".")
+
+		val manifests = List(directory.listFiles: _*)
+			.map(f => new File(f, "META-INF/MANIFEST.MF"))
+			.filter(_.exists)
+
+		println("manifests: " + manifests)
 	}
 	
 	private def writeLines(file: File, lines: List[String]) {
