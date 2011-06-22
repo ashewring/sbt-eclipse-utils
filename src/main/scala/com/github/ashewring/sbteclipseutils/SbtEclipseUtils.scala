@@ -110,12 +110,7 @@ trait SbtEclipseUtils {
 	}
 
 	/* Generate DOT graph from manifest entries */
-	lazy val pdeDependencies = task {
-		showDependencies()
-		None
-	}
-
-	private def showDependencies() = {
+	def createDotDependencyGraph(file: File, vertexFilter: String => Boolean, edgeFilter: (String, String) => Boolean) = {
 		val directory = new File(".")
 
 		val manifests = List(directory.listFiles: _*)
@@ -125,50 +120,61 @@ trait SbtEclipseUtils {
 		println("manifests: " + manifests)
 
 		val digraph = new ListBuffer[(String, String)]()
-		manifests.foreach(m => addEdges(digraph, m))
+		manifests.foreach(m => addEdges(digraph, m, vertexFilter, edgeFilter))
 
-		val stringBuilder = new StringBuilder
-		stringBuilder.append("digraph graphname {\n")
+		val builder = new StringBuilder
+		builder.append("digraph graphname {\n")
 		digraph.foreach(edge => {
-			stringBuilder.append(edge._1)
-			stringBuilder.append(" -> ")
-			stringBuilder.append(edge._2)
-			stringBuilder.append("\n")
+			builder.append("  \"")
+			builder.append(edge._1)
+			builder.append("\" -> \"")
+			builder.append(edge._2)
+			builder.append("\"\n")
 		})
-		stringBuilder.append("}")
+		builder.append("}")
 
-		println(stringBuilder.toString)
-
-		/*
-		digraph graphname {
-     a -> b -> c;
-     b -> d;
- 		}
- 		*/
+		FileUtilities.write(file, builder.toString, log)
 	}
 
-	private def addEdges(digraph: ListBuffer[(String, String)], manifestFile: File) = {
+	private def addEdges(digraph: ListBuffer[(String, String)],
+											 manifestFile: File,
+											 vertexFilter: String => Boolean,
+											 edgeFilter: (String, String) => Boolean) = {
+
 		val manifest = new Manifest(new FileInputStream(manifestFile))
 		val mainAttributes = manifest.getMainAttributes()
-		val symbolicName = mainAttributes.getValue("Bundle-SymbolicName")
+		val symbolicName = shortName(mainAttributes.getValue("Bundle-SymbolicName"))
+		if (vertexFilter(symbolicName)) {
+			// record fragment bundle dependencies
+			val fragmentHostValue = mainAttributes.getValue("Fragment-Host")
+			if (fragmentHostValue != null) {
+				val shortFragmentHostName = shortName(fragmentHostValue)
+				digraph.append( (symbolicName, shortFragmentHostName) )
+			}
 
-		// record fragment bundle dependencies
-		val fragmentHostValue = mainAttributes.getValue("Fragment-Host")
-		if (fragmentHostValue != null) {
-			digraph.append( (symbolicName, fragmentHostValue) )
+			// record "Require-Bundle" dependencies
+			val requireBundleValue = mainAttributes.getValue("Require-Bundle")
+			if (requireBundleValue != null) {
+				val bundleDescriptors = requireBundleValue.split(",")
+				bundleDescriptors.foreach(bundleDescriptor => {
+					val bundleName = shortName(bundleDescriptor)
+					if (edgeFilter(symbolicName, bundleName)) {
+						val edge = (symbolicName, bundleName)
+						digraph.append(edge)
+					}
+				})
+			}
 		}
+	}
 
-		// record "Require-Bundle" dependencies
-		val requireBundleValue = mainAttributes.getValue("Require-Bundle")
-		if (requireBundleValue != null) {
-			val bundleDescriptors = requireBundleValue.split(",")
-			bundleDescriptors.foreach(bundleDescriptor => {
-				// remove additional metadata, e.g., ';bundle-version="1.2.15"'
-				val namePart = bundleDescriptor.trim().split(";")
-				val bundleName = namePart(0)
-				// TODO filter to only care about certain bundles
-				digraph.append( (symbolicName, bundleName) )
-			})
+	private def shortName(fullName: String): String = {
+		// remove additional metadata, e.g., ';bundle-version="1.2.15"'
+		val trimmed = fullName.trim()
+		val index = trimmed.indexOf(";")
+		if (index > 0) {
+			trimmed.substring(0, index)
+		} else {
+			trimmed
 		}
 	}
 	
