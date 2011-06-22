@@ -117,8 +117,6 @@ trait SbtEclipseUtils {
 			.map(f => new File(f, "META-INF/MANIFEST.MF"))
 			.filter(_.exists)
 
-		println("manifests: " + manifests)
-
 		val digraph = new ListBuffer[(String, String)]()
 		manifests.foreach(m => addEdges(digraph, m, vertexFilter, edgeFilter))
 
